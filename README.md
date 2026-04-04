@@ -1,202 +1,52 @@
-# Environment Setup Guide
+# Alumni Influencers Web API
 
-## Table of Contents
-1. [Prerequisites](#prerequisites)
-2. [Installation](#installation)
-3. [Database Configuration (MongoDB Atlas)](#database-configuration-mongodb-atlas)
-4. [Email Configuration (Gmail SMTP)](#email-configuration-gmail-smtp)
-5. [Environment Variables (.env Setup)](#environment-variables-env-setup)
-6. [Running the Application](#running-the-application)
-7. [Testing the Setup](#testing-the-setup)
-8. [Troubleshooting](#troubleshooting)
-9. [Project Structure](#project-structure)
+This is a simple Node.js project for an alumni bidding platform.
 
----
+## Quick Start
 
-## Prerequisites
-
-Before you begin, ensure you have the following installed on your system:
-
-### 1. **Node.js & npm**
-- **Download**: [https://nodejs.org/](https://nodejs.org/) (LTS version recommended)
-- **Verify installation**:
-  ```bash
-  node --version    # Should show v16.x or higher
-  npm --version     # Should show v8.x or higher
-  ```
-
-### 2. **Git**
-- **Download**: [https://git-scm.com/](https://git-scm.com/)
-- **Verify installation**:
-  ```bash
-  git --version
-  ```
-
-### 3. **MongoDB Atlas Account**
-- **Sign up**: [https://www.mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
-- **Free tier**: 512 MB storage (sufficient for development)
-- Create a free MongoDB Atlas cluster before proceeding
-
-### 4. **Gmail Account (for email functionality)**
-- Need a Gmail account with 2-Factor Authentication enabled
-- Will generate an App Password (different from regular password)
-
----
-
-## Installation
-
-### Step 1: Clone the Repository
-```bash
-git clone https://github.com/haseebalthaf/alumni-influencers-web-api-cw.git
-cd alumni-influencers-web-api-cw
-```
-
-### Step 2: Install Dependencies
-```bash
-npm install
-```
-
-This installs all required packages listed in `package.json`:
-- **express**: Web framework
-- **mongoose**: MongoDB ODM
-- **jsonwebtoken**: JWT authentication
-- **bcryptjs**: Password hashing
-- **nodemailer**: Email sending
-- **multer**: File upload handling
-- **express-validator**: Input validation
-- **helmet**: Security headers
-- **cors**: Cross-origin requests
-- **express-rate-limit**: Rate limiting
-- **node-cron**: Scheduled tasks
-- **swagger-ui-express**: API documentation
-
-### Step 3: Create Environment File
-```bash
-cp .env.example .env
-```
-
-This creates a copy of the example environment file. You'll customize it in the next section.
-
----
-
-## Database Configuration (MongoDB Atlas)
-
-### Step 1: Create a MongoDB Atlas Cluster
-
-1. Log in to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
-2. Click **"Create a Deployment"** → Select **M0 (Free Tier)**
-3. Choose region closest to you
-4. Click **"Create Cluster"** (takes 2-3 minutes)
-
-### Step 2: Create Database User
-
-1. Go to **Database Access** → **Add New Database User**
-2. Username: `alumni_admin` (or your choice)
-3. Password: Generate secure password (copy it!)
-4. Click **"Create User"**
-
-### Step 3: Add Network Access
-
-1. Go to **Network Access** → **Add IP Address**
-2. Click **"Allow Access from Anywhere"** (for development)
-   - For production, whitelist specific IPs
-3. Click **"Confirm"**
-
-### Step 4: Get Connection String
-
-1. Go to **Databases** → Click **"Connect"** on your cluster
-2. Choose **"Drivers"** → Select **Node.js**
-3. Copy the connection string, it looks like:
+1. Install dependencies:
+   ```bash
+   npm install
    ```
-   mongodb+srv://alumni_admin:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+2. Create a `.env` file in the project root.
+3. Add your MongoDB connection string and email settings.
+4. Start the server:
+   ```bash
+   npm start
    ```
 
-### Step 5: Replace Credentials
+## Environment Variables
 
-Replace `PASSWORD` with your database user's password and customize database name:
-```
-mongodb+srv://alumni_admin:your_password@cluster0.xxxxx.mongodb.net/alumni_bidding?retryWrites=true&w=majority
-```
+Your `.env` file should include at least:
 
----
-
-## Email Configuration (Gmail SMTP)
-
-### Step 1: Enable 2-Factor Authentication on Gmail
-
-1. Go to [https://myaccount.google.com/security](https://myaccount.google.com/security)
-2. Click **"2-Step Verification"**
-3. Follow the prompts to enable 2FA
-
-### Step 2: Generate Gmail App Password
-
-1. Go to [https://myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-   - If link doesn't work: Go to Security → App Passwords (device/app section)
-2. Select **Mail** and **Windows Computer** (or your OS)
-3. Google generates a **16-character password**
-4. Copy this password (you won't see it again!)
-
-### Step 3: Save Credentials
-
-Save your Gmail address and app password for the `.env` file:
-- **Gmail Address**: your.email@gmail.com
-- **App Password**: 16-character code from Google (spaces removed)
-
----
-
-## Environment Variables (.env Setup)
-
-### Open .env File
-
-Use your text editor (VS Code, Notepad, etc.) to edit the `.env` file in your project root.
-
-### Configure Each Variable
-
-```bash
-# ============================================
-# DATABASE CONFIGURATION
-# ============================================
-
-# MongoDB connection string with authentication
-# Format: mongodb+srv://username:password@cluster/database
-MONGODB_URI=mongodb+srv://alumni_admin:your_password@cluster0.xxxxx.mongodb.net/alumni_bidding?retryWrites=true&w=majority
-
-# ============================================
-# JWT AUTHENTICATION
-# ============================================
-
-# Secret key for signing JWT tokens (use strong random string)
-# Generate using: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-JWT_SECRET=your_super_secret_random_string_here_at_least_32_characters
-
-# JWT token expiration time
+```env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=7d
-
-# ============================================
-# EMAIL CONFIGURATION (Gmail SMTP)
-# ============================================
-
-# Gmail SMTP host
 EMAIL_HOST=smtp.gmail.com
-
-# Gmail SMTP port (587 for TLS, 465 for SSL)
 EMAIL_PORT=587
-
-# Your Gmail address
 EMAIL_USER=your.email@gmail.com
-
-# Gmail App Password (16-character code from Google, remove spaces)
-EMAIL_PASS=xyzabcdefghijklm
-
-# Email sender display name
+EMAIL_PASS=your_email_app_password
 EMAIL_FROM_NAME=Alumni Bidding Platform
-
-# ============================================
-# SERVER CONFIGURATION
-# ============================================
-
-# Server port (frontend runs on 3000)
 PORT=3000
+```
+
+## Project Structure
+
+- `server.js` - App entry point
+- `config/` - Database and other setup
+- `controllers/` - Request handlers
+- `models/` - Mongoose schemas
+- `routes/` - API routes
+- `middleware/` - Authentication and helpers
+- `public/` - Frontend pages and scripts
+
+## Notes
+
+- Use MongoDB Atlas or a local MongoDB instance.
+- Generate a Gmail App Password for email sending.
+- The app uses Express, Mongoose, JWT, and Nodemailer.
+
 
 # Frontend URL for CORS and redirects
 CLIENT_URL=http://localhost:3000
