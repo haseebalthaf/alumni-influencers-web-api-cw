@@ -1,7 +1,9 @@
+const jwt = require("jsonwebtoken");
 const Token = require("../models/Token");
 const Usage = require("../models/Usage");
+const User = require("../models/User");
+const Blacklist = require("../models/Blacklist");
 
-// Authenticate API requests with token
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
@@ -13,34 +15,69 @@ const authenticateToken = async (req, res, next) => {
   try {
     const apiToken = await Token.findOne({ token, isActive: true });
 
-    if (!apiToken) {
-      return res.status(401).json({ message: "Invalid or inactive token" });
+    if (apiToken) {
+      // Log usage only for API tokens
+      await Usage.create({
+        token: apiToken._id,
+        endpoint: req.originalUrl,
+        method: req.method,
+        ip: req.ip,
+        userAgent: req.get("User-Agent"),
+      });
+
+      apiToken.lastUsed = new Date();
+      apiToken.usageCount += 1;
+      await apiToken.save();
+
+      req.apiToken = apiToken;
+      return next();
     }
 
-    // Check permissions
-    if (!apiToken.permissions.includes("read") && req.method !== "GET") {
-      return res.status(403).json({ message: "Insufficient permissions" });
+    // Fallback to JWT auth for frontend users
+    const blacklistedToken = await Blacklist.findOne({ token });
+    if (blacklistedToken) {
+      return res.status(401).json({ message: "Invalid or revoked token" });
     }
 
-    // Log usage
-    await Usage.create({
-      token: apiToken._id,
-      endpoint: req.originalUrl,
-      method: req.method,
-      ip: req.ip,
-      userAgent: req.get("User-Agent"),
-    });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select("-password");
 
-    // Update last used and count
-    apiToken.lastUsed = new Date();
-    apiToken.usageCount += 1;
-    await apiToken.save();
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
 
-    req.apiToken = apiToken;
-    next();
+    req.user = user;
+    return next();
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 };
 
-module.exports = { authenticateToken };
+const checkPermission = (permission) => async (req, res, next) => {
+  if (req.apiToken) {
+    if (!req.apiToken.permissions.includes(permission)) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+    return next();
+  }
+
+  if (req.user) {
+    const permissionRoles = {
+      "read:analytics": ["admin", "alumni"],
+      "read:alumni": ["admin", "alumni"],
+      "read:alumni_of_day": ["admin", "alumni"],
+      read: ["admin", "alumni"],
+    };
+
+    const allowedRoles = permissionRoles[permission] || ["admin"];
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+
+    return next();
+  }
+
+  return res.status(401).json({ message: "Token not authenticated" });
+};
+
+module.exports = { authenticateToken, checkPermission };

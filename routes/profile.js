@@ -1,5 +1,4 @@
 const express = require("express");
-const { body } = require("express-validator");
 const {
   getProfile,
   createOrUpdateProfile,
@@ -8,7 +7,12 @@ const {
   searchProfiles,
   getProfileById,
 } = require("../controllers/profileController");
-const { protect, isAlumniOrAdmin } = require("../middleware/auth");
+const { authenticateToken, checkPermission } = require("../middleware/apiAuth");
+const { 
+  validateProfileUpdate,
+  validateSearch,
+  validateProfileId
+} = require("../middleware/validation");
 
 const router = express.Router();
 
@@ -26,7 +30,7 @@ const router = express.Router();
  *       401:
  *         description: Unauthorized
  */
-router.get("/", protect, isAlumniOrAdmin, getProfile);
+router.get("/", authenticateToken, checkPermission("read:alumni"), getProfile);
 
 /**
  * @swagger
@@ -53,7 +57,7 @@ router.get("/", protect, isAlumniOrAdmin, getProfile);
  *       401:
  *         description: Unauthorized
  */
-router.get("/search", protect, isAlumniOrAdmin, searchProfiles);
+router.get("/search", authenticateToken, checkPermission("read:alumni"), searchProfiles);
 
 /**
  * @swagger
@@ -78,7 +82,7 @@ router.get("/search", protect, isAlumniOrAdmin, searchProfiles);
  *       404:
  *         description: Profile not found
  */
-router.get("/:id", protect, isAlumniOrAdmin, getProfileById);
+router.get("/:id", authenticateToken, checkPermission("read:alumni"), getProfileById);
 
 /**
  * @swagger
@@ -130,20 +134,9 @@ router.get("/:id", protect, isAlumniOrAdmin, getProfileById);
  */
 router.post(
   "/",
-  protect,
-  isAlumniOrAdmin,
-  body("personalInfo.firstName")
-    .notEmpty()
-    .trim()
-    .withMessage("First name is required"),
-  body("personalInfo.lastName")
-    .notEmpty()
-    .trim()
-    .withMessage("Last name is required"),
-  body("linkedInUrl")
-    .optional()
-    .isURL()
-    .withMessage("LinkedIn URL must be valid"),
+  authenticateToken,
+  checkPermission("read:alumni"),
+  validateProfileUpdate,
   createOrUpdateProfile,
 );
 
@@ -171,7 +164,7 @@ router.post(
  *       401:
  *         description: Unauthorized
  */
-router.post("/upload-image", protect, isAlumniOrAdmin, uploadProfileImage);
+router.post("/upload-image", authenticateToken, checkPermission("read:alumni"), uploadProfileImage);
 
 /**
  * @swagger

@@ -1,5 +1,4 @@
 const express = require("express");
-const { body, validationResult } = require("express-validator");
 const {
   register,
   verifyEmail,
@@ -9,6 +8,12 @@ const {
   resetPassword
 } = require("../controllers/authController");
 const { protect } = require("../middleware/auth");
+const { 
+  validateRegister, 
+  validateLogin, 
+  validatePasswordReset,
+  validateResetPasswordToken 
+} = require("../middleware/validation");
 
 const router = express.Router();
 
@@ -48,18 +53,7 @@ const router = express.Router();
  */
 router.post(
   "/register",
-  body("email")
-    .isEmail()
-    .withMessage("Invalid email address")
-    .custom((value) => {
-      if (!value.toLowerCase().endsWith("@my.westminster.ac.uk")) {
-        throw new Error("Email must be a university domain address");
-      }
-      return true;
-    }),
-  body("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters"),
+  validateRegister,
   register,
 );
 
@@ -121,8 +115,7 @@ router.get("/verify/:token", verifyEmail);
  */
 router.post(
   "/login",
-  body("email").isEmail().withMessage("Invalid email address"),
-  body("password").notEmpty().withMessage("Password is required"),
+  validateLogin,
   login,
 );
 
@@ -164,7 +157,7 @@ router.post("/logout", protect, logout);
  */
 router.post(
   "/forgot-password",
-  body("email").isEmail().withMessage("Invalid email address"),
+  validatePasswordReset,
   forgotPassword,
 );
 
@@ -198,9 +191,7 @@ router.post(
  */
 router.post(
   "/reset-password/:token",
-  body("password")
-    .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters"),
+  validateResetPasswordToken,
   resetPassword,
 );
 

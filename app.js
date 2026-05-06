@@ -1,7 +1,9 @@
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 require('dotenv').config();
@@ -10,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const profileRoutes = require('./routes/profile');
 const biddingRoutes = require('./routes/bidding');
 const adminRoutes = require('./routes/admin');
+const analyticsRoutes = require('./routes/analytics');
 
 const app = express();
 
@@ -43,7 +46,10 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(cookieParser());
+
 app.use(express.static('public'));
+app.use('/shared', express.static(path.join(__dirname, 'shared')));
 
 const swaggerOptions = {
   definition: {
@@ -97,6 +103,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/bidding', biddingRoutes);
 app.use('/api/admin', adminRoutes);
+// Analytics is read-only, no CSRF required
+app.use('/api/analytics', analyticsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });

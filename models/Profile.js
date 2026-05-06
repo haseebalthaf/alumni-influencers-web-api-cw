@@ -49,6 +49,7 @@ const profileSchema = new mongoose.Schema({
         type: String,
         validate: {
           validator: function (v) {
+            if (!v || v.trim() === "") return true;
             return /^https?:\/\/.*$/.test(v);
           },
           message: "Must be a valid URL",
@@ -65,6 +66,7 @@ const profileSchema = new mongoose.Schema({
         type: String,
         validate: {
           validator: function (v) {
+            if (!v || v.trim() === "") return true;
             return /^https?:\/\/.*$/.test(v);
           },
           message: "Must be a valid URL",
@@ -81,6 +83,7 @@ const profileSchema = new mongoose.Schema({
         type: String,
         validate: {
           validator: function (v) {
+            if (!v || v.trim() === "") return true;
             return /^https?:\/\/.*$/.test(v);
           },
           message: "Must be a valid URL",

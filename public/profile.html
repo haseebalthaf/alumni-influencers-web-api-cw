@@ -13,49 +13,62 @@
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f7fa;
+        background: #f5f7fb;
         min-height: 100vh;
-        padding-bottom: 40px;
+        display: flex;
+        color: #333;
       }
 
-      .navbar {
+      .sidebar {
+        width: 260px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px 40px;
+        padding: 30px 20px;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+      }
+
+      .sidebar h2 {
+        font-size: 1.5rem;
+        margin-bottom: 40px;
+        text-align: center;
+      }
+
+      .sidebar-menu {
         display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-        position: sticky;
-        top: 0;
-        z-index: 100;
+        flex-direction: column;
+        gap: 12px;
       }
 
-      .navbar h1 {
-        font-size: 1.8em;
-        font-weight: 700;
-      }
-
-      .logout-btn {
-        background: rgba(255, 255, 255, 0.2);
+      .sidebar-menu a,
+      .sidebar-menu button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.15);
         color: white;
-        border: 2px solid white;
-        padding: 10px 20px;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 8px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 0.95rem;
         transition: all 0.3s ease;
+        text-align: left;
       }
 
-      .logout-btn:hover {
-        background: white;
-        color: #667eea;
+      .sidebar-menu a:hover,
+      .sidebar-menu button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateX(4px);
       }
 
-      .container {
-        max-width: 900px;
-        margin: 40px auto;
-        padding: 0 20px;
+      .main-content {
+        margin-left: 260px;
+        flex: 1;
+        padding: 30px;
       }
 
       .page-header {
@@ -373,17 +386,12 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="/shared/sidebar.css">
   </head>
   <body>
-    <div class="navbar">
-      <h1>🎓 My Profile</h1>
-      <div>
-        <a class="logout-btn" href="bidding.html">Bidding</a>
-        <button class="logout-btn" id="logoutBtn">Logout</button>
-      </div>
-    </div>
+    <div id="sidebar-container"></div>
 
-    <div class="container">
+    <div class="main-content">
       <div class="page-header">
         <h2>Complete Your Alumni Profile</h2>
         <p>Build your professional presence in the Alumni Network</p>
@@ -499,6 +507,21 @@
       </form>
     </div>
 
+    <script src="/shared/utils.js"></script>
     <script src="profile.js"></script>
+    <script>
+      // Load shared sidebar
+      fetch('/shared/sidebar.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('sidebar-container').innerHTML = html;
+          // Set up logout handler
+          const logoutBtn = document.getElementById('sidebarLogoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', window.SharedUtils?.handleLogout || logout);
+          }
+        })
+        .catch(error => console.error('Failed to load sidebar:', error));
+    </script>
   </body>
 </html>

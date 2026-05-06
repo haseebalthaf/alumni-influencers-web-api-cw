@@ -1,38 +1,38 @@
-const API_BASE = "http://localhost:3000/api";
-const token = localStorage.getItem("token");
+// Use shared utilities
+const API_BASE = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+const token = window.SharedUtils?.getToken();
 
-if (!token) {
+function redirectToLogin() {
+  window.SharedUtils?.navigateTo("login.html");
   window.location.href = "login.html";
 }
 
-const bidForm = document.getElementById("bidForm");
-const cancelBidBtn = document.getElementById("cancelBidBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+if (!token || !window.SharedUtils?.validateToken()) {
+  redirectToLogin();
+} else {
+  window.addEventListener("DOMContentLoaded", () => {
+    const bidForm = document.getElementById("bidForm");
+    const cancelBidBtn = document.getElementById("cancelBidBtn");
 
-window.addEventListener("load", () => {
-  loadStatus();
-  loadHistory();
-  loadTomorrowSlot();
-});
+    bidForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amount = Number(document.getElementById("bidAmount").value);
+      if (!amount || amount <= 0) {
+        showMessage("Enter a positive bid amount", "error");
+        return;
+      }
+      await placeBid(amount);
+    });
 
-bidForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const amount = Number(document.getElementById("bidAmount").value);
-  if (!amount || amount <= 0) {
-    showMessage("Enter a positive bid amount", "error");
-    return;
-  }
-  await placeBid(amount);
-});
+    cancelBidBtn?.addEventListener("click", async () => {
+      await cancelBid();
+    });
 
-cancelBidBtn.addEventListener("click", async () => {
-  await cancelBid();
-});
-
-logoutBtn.addEventListener("click", () => {
-  localStorage.removeItem("token");
-  window.location.href = "login.html";
-});
+    loadStatus();
+    loadHistory();
+    loadTomorrowSlot();
+  });
+}
 
 async function loadStatus() {
   try {
@@ -58,9 +58,15 @@ async function loadStatus() {
     document.getElementById("remainingSlots").textContent = data.remainingSlots;
     document.getElementById("canBid").textContent = data.canBid ? "Yes" : "No";
 
-    if (!data.canBid) {
-      cancelBidBtn.disabled = true;
-      cancelBidBtn.textContent = "Cannot bid now";
+    const cancelBidBtn = document.getElementById("cancelBidBtn");
+    if (cancelBidBtn) {
+      if (!data.canBid) {
+        cancelBidBtn.disabled = true;
+        cancelBidBtn.textContent = "Cannot bid now";
+      } else {
+        cancelBidBtn.disabled = false;
+        cancelBidBtn.textContent = "Cancel active bid";
+      }
     }
   } catch (error) {
     showMessage("Failed to load bidding status", "error");
@@ -81,6 +87,7 @@ async function loadHistory() {
 
     const data = await response.json();
     const historyList = document.getElementById("historyList");
+    if (!historyList) return;
     historyList.innerHTML = "";
 
     if (!data.history || data.history.length === 0) {
@@ -100,8 +107,10 @@ async function loadHistory() {
     });
   } catch (error) {
     const historyList = document.getElementById("historyList");
-    historyList.innerHTML =
-      '<li class="history-item">Unable to load history.</li>';
+    if (historyList) {
+      historyList.innerHTML =
+        '<li class="history-item">Unable to load history.</li>';
+    }
   }
 }
 
@@ -114,6 +123,8 @@ async function loadTomorrowSlot() {
     });
 
     const slot = document.getElementById("tomorrowSlot");
+    if (!slot) return;
+
     if (!response.ok) {
       slot.textContent = "Tomorrow slot is not available yet.";
       return;
@@ -122,8 +133,10 @@ async function loadTomorrowSlot() {
     const data = await response.json();
     slot.innerHTML = `<strong>${data.winner.name}</strong> — ${data.winner.biography || "No biography available"}`;
   } catch (error) {
-    document.getElementById("tomorrowSlot").textContent =
-      "Unable to load tomorrow slot.";
+    const slot = document.getElementById("tomorrowSlot");
+    if (slot) {
+      slot.textContent = "Unable to load tomorrow slot.";
+    }
   }
 }
 
@@ -145,7 +158,10 @@ async function placeBid(amount) {
     }
 
     showMessage("Bid placed successfully", "success");
-    document.getElementById("bidAmount").value = "";
+    const bidInput = document.getElementById("bidAmount");
+    if (bidInput) {
+      bidInput.value = "";
+    }
     await loadStatus();
     await loadHistory();
   } catch (error) {
@@ -178,6 +194,7 @@ async function cancelBid() {
 
 function showMessage(text, type) {
   const messageDiv = document.getElementById("message");
+  if (!messageDiv) return;
   messageDiv.textContent = text;
   messageDiv.className = type;
   messageDiv.style.display = "block";

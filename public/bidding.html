@@ -15,65 +15,60 @@
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background: #f5f7fb;
         min-height: 100vh;
+        display: flex;
         color: #333;
       }
 
-      .navbar {
+      .sidebar {
+        width: 260px;
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 20px 30px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        flex-wrap: wrap;
+        padding: 30px 20px;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
       }
 
-      .navbar h1 {
+      .sidebar h2 {
         font-size: 1.5rem;
-        font-weight: 700;
+        margin-bottom: 40px;
+        text-align: center;
       }
 
-      .navbar .nav-actions {
+      .sidebar-menu {
         display: flex;
+        flex-direction: column;
         gap: 12px;
-        flex-wrap: wrap;
       }
 
-      .btn,
-      .link-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 12px 20px;
+      .sidebar-menu a,
+      .sidebar-menu button {
+        display: block;
+        width: 100%;
+        padding: 14px 16px;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        text-decoration: none;
+        border: 1px solid rgba(255, 255, 255, 0.25);
         border-radius: 8px;
-        border: none;
         cursor: pointer;
         font-weight: 600;
-        text-decoration: none;
-        color: white;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        text-align: left;
       }
 
-      .btn:hover,
-      .link-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+      .sidebar-menu a:hover,
+      .sidebar-menu button:hover {
+        background: rgba(255, 255, 255, 0.25);
+        transform: translateX(4px);
       }
 
-      .btn.secondary {
-        background: rgba(255, 255, 255, 0.18);
-        color: white;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-      }
-
-      .container {
-        max-width: 1020px;
-        margin: 30px auto;
-        padding: 0 20px 40px;
+      .main-content {
+        margin-left: 260px;
+        flex: 1;
+        padding: 30px;
       }
 
       .page-header {
@@ -203,17 +198,12 @@
         font-size: 0.95rem;
       }
     </style>
+    <link rel="stylesheet" href="/shared/sidebar.css">
   </head>
   <body>
-    <div class="navbar">
-      <h1>🪙 Alumni Bidding</h1>
-      <div class="nav-actions">
-        <a class="link-btn secondary" href="profile.html">Back to Profile</a>
-        <button class="btn" id="logoutBtn">Logout</button>
-      </div>
-    </div>
+    <div id="sidebar-container"></div>
 
-    <div class="container">
+    <div class="main-content">
       <div class="page-header">
         <h2>Place your bid for the featured slot</h2>
         <p>
@@ -287,15 +277,29 @@
           <li class="history-item">Loading history...</li>
         </ul>
       </div>
+      <div class="footer">
+        <p>
+          Manage bidding with confidence. Visit the API docs for developer
+          access to the featured alumnus endpoint.
+        </p>
+      </div>
     </div>
 
-    <div class="footer">
-      <p>
-        Manage bidding with confidence. Visit the API docs for developer access
-        to the featured alumnus endpoint.
-      </p>
-    </div>
-
+    <script src="/shared/utils.js"></script>
     <script src="bidding.js"></script>
+    <script>
+      // Load shared sidebar
+      fetch('/shared/sidebar.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('sidebar-container').innerHTML = html;
+          // Set up logout handler
+          const logoutBtn = document.getElementById('sidebarLogoutBtn');
+          if (logoutBtn) {
+            logoutBtn.addEventListener('click', window.SharedUtils?.handleLogout || handleLogout);
+          }
+        })
+        .catch(error => console.error('Failed to load sidebar:', error));
+    </script>
   </body>
 </html>

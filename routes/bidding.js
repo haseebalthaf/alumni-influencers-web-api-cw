@@ -1,5 +1,4 @@
 const express = require("express");
-const { body } = require("express-validator");
 const {
   getBidStatus,
   placeBid,
@@ -9,7 +8,8 @@ const {
   cancelBid,
 } = require("../controllers/biddingController");
 const { protect, isAlumni } = require("../middleware/auth");
-const { authenticateToken } = require("../middleware/apiAuth");
+const { authenticateToken, checkPermission } = require("../middleware/apiAuth");
+const { validatePlaceBid } = require("../middleware/validation");
 
 const router = express.Router();
 
@@ -72,11 +72,7 @@ router.post(
   "/bid",
   protect,
   isAlumni,
-  body("amount").isNumeric().withMessage("Bid amount must be a number"),
-  body("amount").custom((value) => {
-    if (value <= 0) throw new Error("Bid amount must be greater than 0");
-    return true;
-  }),
+  validatePlaceBid,
   placeBid,
 );
 
@@ -191,6 +187,6 @@ router.get("/tomorrow-slot", authenticateToken, getTomorrowSlot);
  *       404:
  *         description: No winner selected for today
  */
-router.get("/today-winner", authenticateToken, getTodayWinner);
+router.get("/today-winner", authenticateToken, checkPermission("read:alumni_of_day"), getTodayWinner);
 
 module.exports = router;

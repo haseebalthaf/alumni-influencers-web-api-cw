@@ -1,8 +1,10 @@
-const API_BASE = "http://localhost:3000/api";
-let token = localStorage.getItem("token");
+// Use shared utilities
+const API_BASE = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+let token = window.SharedUtils?.getToken();
 
+// Redirect if no token
 if (!token) {
-  window.location.href = "login.html";
+  window.SharedUtils?.navigateTo("login.html") || (window.location.href = "login.html");
 }
 
 // Load existing profile
@@ -13,9 +15,7 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   await saveProfile();
 });
 
-// Logout button
-document.getElementById("logoutBtn").addEventListener("click", logout);
-
+// Logout button - will be set up by the sidebar loading script
 // Add buttons
 document.getElementById("addDegreeBtn").addEventListener("click", addDegree);
 document
@@ -119,6 +119,16 @@ function showMessage(text, type) {
   setTimeout(() => (messageDiv.style.display = "none"), 3000);
 }
 
+function normalizeOptionalUrl(value) {
+  const trimmed = String(value || "").trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeOptionalText(value) {
+  const trimmed = String(value || "").trim();
+  return trimmed ? trimmed : undefined;
+}
+
 async function logout() {
   try {
     // Call backend logout endpoint
@@ -203,10 +213,10 @@ function getDegrees() {
   ).map((item) => {
     const inputs = item.querySelectorAll("input");
     return {
-      title: inputs[0].value,
-      university: inputs[1].value,
+      title: inputs[0].value.trim(),
+      university: inputs[1].value.trim(),
       completionDate: inputs[2].value,
-      url: inputs[3].value,
+      url: normalizeOptionalUrl(inputs[3].value),
     };
   });
 }
@@ -247,10 +257,10 @@ function getCertifications() {
   ).map((item) => {
     const inputs = item.querySelectorAll("input");
     return {
-      title: inputs[0].value,
-      issuingBody: inputs[1].value,
+      title: inputs[0].value.trim(),
+      issuingBody: inputs[1].value.trim(),
       completionDate: inputs[2].value,
-      url: inputs[3].value,
+      url: normalizeOptionalUrl(inputs[3].value),
     };
   });
 }
@@ -291,10 +301,10 @@ function getLicences() {
   ).map((item) => {
     const inputs = item.querySelectorAll("input");
     return {
-      title: inputs[0].value,
-      issuingBody: inputs[1].value,
+      title: inputs[0].value.trim(),
+      issuingBody: inputs[1].value.trim(),
       completionDate: inputs[2].value,
-      url: inputs[3].value,
+      url: normalizeOptionalUrl(inputs[3].value),
     };
   });
 }
@@ -335,10 +345,10 @@ function getCourses() {
   ).map((item) => {
     const inputs = item.querySelectorAll("input");
     return {
-      title: inputs[0].value,
-      provider: inputs[1].value,
+      title: inputs[0].value.trim(),
+      provider: inputs[1].value.trim(),
       completionDate: inputs[2].value,
-      url: inputs[3].value,
+      url: normalizeOptionalUrl(inputs[3].value),
     };
   });
 }
@@ -384,11 +394,11 @@ function getEmployment() {
     const inputs = item.querySelectorAll("input");
     const textarea = item.querySelector("textarea");
     return {
-      position: inputs[0].value,
-      company: inputs[1].value,
+      position: inputs[0].value.trim(),
+      company: inputs[1].value.trim(),
       startDate: inputs[2].value,
       endDate: inputs[3].value || null,
-      description: textarea.value,
+      description: normalizeOptionalText(textarea.value),
     };
   });
 }

@@ -21,7 +21,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       localStorage.setItem("token", data.token);
       showMessage("Login successful! Redirecting...", "success");
       setTimeout(() => {
-        window.location.href = "profile.html";
+        window.location.href = "dashboard.html";
       }, 1000);
     } else {
       showMessage(data.message || "Login failed", "error");
