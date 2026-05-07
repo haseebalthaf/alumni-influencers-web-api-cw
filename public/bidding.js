@@ -1,14 +1,19 @@
-// Use shared utilities
-const API_BASE = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
-const token = window.SharedUtils?.getToken();
+// Read API base + token from window.SharedUtils (shared/utils.js).
+// Avoid redeclaring `API_BASE`/`token` here — colliding top-level `const`s
+// across classic scripts cause the whole file to fail parsing.
+const apiBase = () => window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+const authToken = () => window.SharedUtils?.getToken?.() || localStorage.getItem("token");
 
 function redirectToLogin() {
   window.SharedUtils?.navigateTo("login.html");
   window.location.href = "login.html";
 }
 
-if (!token || !window.SharedUtils?.validateToken()) {
+if (!authToken() || !window.SharedUtils?.validateToken()) {
   redirectToLogin();
+} else if (window.SharedUtils?.getRole?.() === "admin") {
+  // Bidding is alumni-only; bounce admins to the dashboard.
+  window.location.href = "dashboard.html";
 } else {
   window.addEventListener("DOMContentLoaded", () => {
     const bidForm = document.getElementById("bidForm");
@@ -36,9 +41,9 @@ if (!token || !window.SharedUtils?.validateToken()) {
 
 async function loadStatus() {
   try {
-    const response = await fetch(`${API_BASE}/bidding/status`, {
+    const response = await fetch(`${apiBase()}/bidding/status`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
     });
 
@@ -75,9 +80,9 @@ async function loadStatus() {
 
 async function loadHistory() {
   try {
-    const response = await fetch(`${API_BASE}/bidding/history`, {
+    const response = await fetch(`${apiBase()}/bidding/history`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
     });
 
@@ -116,9 +121,9 @@ async function loadHistory() {
 
 async function loadTomorrowSlot() {
   try {
-    const response = await fetch(`${API_BASE}/bidding/tomorrow-slot`, {
+    const response = await fetch(`${apiBase()}/bidding/tomorrow-slot`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
     });
 
@@ -142,11 +147,11 @@ async function loadTomorrowSlot() {
 
 async function placeBid(amount) {
   try {
-    const response = await fetch(`${API_BASE}/bidding/bid`, {
+    const response = await fetch(`${apiBase()}/bidding/bid`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
       body: JSON.stringify({ amount }),
     });
@@ -171,10 +176,10 @@ async function placeBid(amount) {
 
 async function cancelBid() {
   try {
-    const response = await fetch(`${API_BASE}/bidding/cancel`, {
+    const response = await fetch(`${apiBase()}/bidding/cancel`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
     });
 

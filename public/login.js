@@ -19,6 +19,9 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     if (response.ok) {
       localStorage.setItem("token", data.token);
+      if (data.user?.role) {
+        localStorage.setItem("userRole", data.user.role);
+      }
       showMessage("Login successful! Redirecting...", "success");
       setTimeout(() => {
         window.location.href = "dashboard.html";

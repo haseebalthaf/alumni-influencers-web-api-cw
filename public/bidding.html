@@ -293,6 +293,7 @@
         .then(response => response.text())
         .then(html => {
           document.getElementById('sidebar-container').innerHTML = html;
+          window.SharedUtils?.applySidebarRoleVisibility?.(document.getElementById('sidebar-container'));
           // Set up logout handler
           const logoutBtn = document.getElementById('sidebarLogoutBtn');
           if (logoutBtn) {

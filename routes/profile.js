@@ -20,15 +20,19 @@ const router = express.Router();
  * @swagger
  * /api/profile:
  *   get:
- *     summary: Get user profile
+ *     summary: Get current user's profile
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     responses:
  *       200:
- *         description: Profile retrieved successfully
- *       401:
- *         description: Unauthorized
+ *         description: Profile retrieved
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Profile' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.get("/", authenticateToken, checkPermission("read:alumni"), getProfile);
 
@@ -36,26 +40,27 @@ router.get("/", authenticateToken, checkPermission("read:alumni"), getProfile);
  * @swagger
  * /api/profile/search:
  *   get:
- *     summary: Search profiles
+ *     summary: Search profiles by name or current/past company
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: name
- *         schema:
- *           type: string
- *         description: Search by name
+ *         schema: { type: string }
+ *         description: Case-insensitive partial match against firstName / lastName
  *       - in: query
  *         name: company
- *         schema:
- *           type: string
- *         description: Search by company
+ *         schema: { type: string }
+ *         description: Case-insensitive partial match against employmentHistory.company
  *     responses:
  *       200:
- *         description: Profiles found
- *       401:
- *         description: Unauthorized
+ *         description: Up to 20 matching profiles (limited fields)
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ProfileSearchResult' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 router.get("/search", authenticateToken, checkPermission("read:alumni"), searchProfiles);
 
@@ -67,20 +72,21 @@ router.get("/search", authenticateToken, checkPermission("read:alumni"), searchP
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
- *         description: User ID
+ *         schema: { type: string }
+ *         description: User _id
  *     responses:
  *       200:
- *         description: Profile retrieved successfully
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Profile not found
+ *         description: Profile retrieved
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Profile' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.get("/:id", authenticateToken, checkPermission("read:alumni"), getProfileById);
 
@@ -88,7 +94,7 @@ router.get("/:id", authenticateToken, checkPermission("read:alumni"), getProfile
  * @swagger
  * /api/profile:
  *   post:
- *     summary: Create or update profile
+ *     summary: Create or update the current user's profile
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
@@ -96,41 +102,20 @@ router.get("/:id", authenticateToken, checkPermission("read:alumni"), getProfile
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               personalInfo:
- *                 type: object
- *                 properties:
- *                   firstName:
- *                     type: string
- *                   lastName:
- *                     type: string
- *                   biography:
- *                     type: string
- *               linkedInUrl:
- *                 type: string
- *               degrees:
- *                 type: array
- *               certifications:
- *                 type: array
- *               licences:
- *                 type: array
- *               courses:
- *                 type: array
- *               employmentHistory:
- *                 type: array
- *               sponsorshipOffers:
- *                 type: array
- *               eventParticipationMonth:
- *                 type: string
+ *           schema: { $ref: '#/components/schemas/ProfileUpsertRequest' }
  *     responses:
  *       200:
  *         description: Profile updated
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Profile' }
  *       201:
  *         description: Profile created
- *       401:
- *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Profile' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 router.post(
   "/",
@@ -144,7 +129,7 @@ router.post(
  * @swagger
  * /api/profile/upload-image:
  *   post:
- *     summary: Upload profile image
+ *     summary: Upload a profile image (max 5MB, image/* only)
  *     tags: [Profile]
  *     security:
  *       - bearerAuth: []
@@ -154,15 +139,24 @@ router.post(
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required: [image]
  *             properties:
  *               image:
  *                 type: string
  *                 format: binary
  *     responses:
  *       200:
- *         description: Image uploaded
- *       401:
- *         description: Unauthorized
+ *         description: Image stored on disk and filename persisted on the profile
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 filename: { type: string, description: 'Use with GET /api/profile/image/{filename}' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.post("/upload-image", authenticateToken, checkPermission("read:alumni"), uploadProfileImage);
 

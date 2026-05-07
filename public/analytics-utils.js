@@ -3,12 +3,8 @@
  * Shared utilities for analytics functionality across dashboard and analytics pages
  */
 
-// Configuration
-const API_BASE = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
-
-// Get token from shared utilities
-const getToken = () => window.SharedUtils?.getToken() || localStorage.getItem("token");
-const token = getToken();
+// Configuration / token are sourced from window.SharedUtils (shared/utils.js)
+// to avoid redeclaring the same top-level identifiers across classic scripts.
 
 // Chart configuration
 const chartIds = {
@@ -32,11 +28,6 @@ let selectedDegree = "";
 // Authentication
 // =====================
 
-// Use shared token validation
-function validateToken() {
-  return window.SharedUtils?.validateToken() || false;
-}
-
 function showTokenError(message) {
   const mainContent = document.querySelector(".main-content");
   if (mainContent) {
@@ -58,22 +49,20 @@ function handleTokenError() {
   window.location.href = "login.html";
 }
 
-// Use shared logout function
-function handleLogout() {
-  return window.SharedUtils?.handleLogout();
-}
-
 // =====================
 // API Calls
 // =====================
 
 async function fetchAnalytics(endpoint) {
+  const apiBase = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+  const token = window.SharedUtils?.getToken?.() || localStorage.getItem("token");
+
   const headers = {};
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}/analytics/${endpoint}`, {
+  const response = await fetch(`${apiBase}/analytics/${endpoint}`, {
     headers,
   });
 

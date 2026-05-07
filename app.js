@@ -4,8 +4,8 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
-const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const { swaggerSpec, swaggerUiOptions } = require('./config/swagger');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -50,54 +50,10 @@ app.use(cookieParser());
 
 app.use(express.static('public'));
 app.use('/shared', express.static(path.join(__dirname, 'shared')));
+app.use('/vendor/chart.js', express.static(path.join(__dirname, 'node_modules/chart.js/dist')));
 
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Alumni Influencers API',
-      version: '1.0.0',
-      description: 'API for Alumni Influencers platform',
-    },
-    servers: [
-      {
-        url: 'http://localhost:3000',
-        description: 'Development server',
-      },
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-        apiKeyAuth: {
-          type: 'apiKey',
-          in: 'header',
-          name: 'Authorization',
-          description: 'API Key authentication. Format: Bearer <token>',
-        },
-      },
-    },
-  },
-  apis: ['./routes/*.js'],
-};
-
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-  explorer: true,
-  swaggerOptions: {
-    persistAuthorization: true,
-    displayRequestDuration: true,
-    docExpansion: 'none',
-    filter: false,
-    showExtensions: true,
-    showCommonExtensions: true,
-    tryItOutEnabled: true,
-  },
-}));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerUiOptions));
+app.get('/api-docs.json', (req, res) => res.json(swaggerSpec));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);

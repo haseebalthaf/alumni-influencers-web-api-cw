@@ -26,22 +26,22 @@ const router = express.Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
+ *             required: [name]
  *             properties:
- *               name:
- *                 type: string
- *                 description: Name for the token
+ *               name: { type: string }
  *               permissions:
  *                 type: array
- *                 items:
- *                   type: string
- *                 default: ["read"]
+ *                 items: { $ref: '#/components/schemas/TokenPermission' }
+ *                 default: ['read']
  *     responses:
  *       201:
- *         description: Token created successfully
- *       401:
- *         description: Unauthorized
+ *         description: Token created — `token` is shown only here
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ApiTokenCreateResponse' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
  */
 router.post(
   "/tokens",
@@ -55,15 +55,20 @@ router.post(
  * @swagger
  * /api/admin/tokens:
  *   get:
- *     summary: Get all API tokens
+ *     summary: List all API tokens (without secret values)
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: List of tokens
- *       401:
- *         description: Unauthorized
+ *         description: Tokens
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/ApiToken' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
  */
 router.get("/tokens", protect, isAdmin, getTokens);
 
@@ -71,7 +76,7 @@ router.get("/tokens", protect, isAdmin, getTokens);
  * @swagger
  * /api/admin/tokens/{id}:
  *   delete:
- *     summary: Revoke an API token
+ *     summary: Revoke (deactivate) an API token
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -79,15 +84,13 @@ router.get("/tokens", protect, isAdmin, getTokens);
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Token revoked
- *       401:
- *         description: Unauthorized
- *       404:
- *         description: Token not found
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.delete("/tokens/:id", protect, isAdmin, revokeToken);
 
@@ -95,7 +98,7 @@ router.delete("/tokens/:id", protect, isAdmin, revokeToken);
  * @swagger
  * /api/admin/tokens/{id}:
  *   put:
- *     summary: Update token permissions
+ *     summary: Update an API token's permissions
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
@@ -103,8 +106,7 @@ router.delete("/tokens/:id", protect, isAdmin, revokeToken);
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     requestBody:
  *       required: true
  *       content:
@@ -114,13 +116,13 @@ router.delete("/tokens/:id", protect, isAdmin, revokeToken);
  *             properties:
  *               permissions:
  *                 type: array
- *                 items:
- *                   type: string
+ *                 items: { $ref: '#/components/schemas/TokenPermission' }
  *     responses:
  *       200:
  *         description: Token updated
- *       401:
- *         description: Unauthorized
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.put("/tokens/:id", protect, isAdmin, updateToken);
 
@@ -128,15 +130,20 @@ router.put("/tokens/:id", protect, isAdmin, updateToken);
  * @swagger
  * /api/admin/usage:
  *   get:
- *     summary: Get API token usage statistics
+ *     summary: Aggregated API token usage stats
  *     tags: [Admin]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Usage statistics
- *       401:
- *         description: Unauthorized
+ *         description: Usage statistics by token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/UsageStat' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
  */
 router.get("/usage", protect, isAdmin, getUsageStats);
 

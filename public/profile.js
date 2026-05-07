@@ -1,9 +1,11 @@
-// Use shared utilities
-const API_BASE = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
-let token = window.SharedUtils?.getToken();
+// Read API base + token from window.SharedUtils (shared/utils.js).
+// Avoid redeclaring `API_BASE` here — it collides with the const in shared/utils.js
+// when both classic scripts share the global lexical scope.
+const apiBase = () => window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+const authToken = () => window.SharedUtils?.getToken?.() || localStorage.getItem("token");
 
 // Redirect if no token
-if (!token) {
+if (!authToken()) {
   window.SharedUtils?.navigateTo("login.html") || (window.location.href = "login.html");
 }
 
@@ -42,9 +44,9 @@ document.getElementById("profileImage").addEventListener("change", (e) => {
 
 async function loadProfile() {
   try {
-    const response = await fetch(`${API_BASE}/profile`, {
+    const response = await fetch(`${apiBase()}/profile`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
     });
 
@@ -91,11 +93,11 @@ async function saveProfile() {
   };
 
   try {
-    const response = await fetch(`${API_BASE}/profile`, {
+    const response = await fetch(`${apiBase()}/profile`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
       body: JSON.stringify(profileData),
     });
@@ -132,10 +134,10 @@ function normalizeOptionalText(value) {
 async function logout() {
   try {
     // Call backend logout endpoint
-    const response = await fetch(`${API_BASE}/auth/logout`, {
+    const response = await fetch(`${apiBase()}/auth/logout`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
         "Content-Type": "application/json",
       },
     });
@@ -156,10 +158,10 @@ async function uploadImage(file) {
   formData.append("image", file);
 
   try {
-    const response = await fetch(`${API_BASE}/profile/upload-image`, {
+    const response = await fetch(`${apiBase()}/profile/upload-image`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken()}`,
       },
       body: formData,
     });

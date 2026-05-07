@@ -21,35 +21,17 @@ const router = express.Router();
  * @swagger
  * /api/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new alumnus and create their (unverified) profile
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - firstName
- *               - lastName
- *               - email
- *               - password
- *             properties:
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 minLength: 8
+ *           schema: { $ref: '#/components/schemas/RegisterRequest' }
  *     responses:
  *       201:
- *         description: Registration successful
- *       400:
- *         description: User already exists or validation failed
+ *         description: Registration accepted; verification email sent (or URL returned if SMTP isn't configured)
+ *       400: { $ref: '#/components/responses/ValidationError' }
  */
 router.post(
   "/register",
@@ -81,37 +63,20 @@ router.get("/verify/:token", verifyEmail);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Login user
+ *     summary: Log in and receive a JWT
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - email
- *               - password
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
+ *           schema: { $ref: '#/components/schemas/LoginRequest' }
  *     responses:
  *       200:
  *         description: Login successful
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *                 user:
- *                   type: object
- *       401:
- *         description: Invalid credentials
+ *             schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 router.post(
   "/login",

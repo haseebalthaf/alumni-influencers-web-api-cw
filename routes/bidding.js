@@ -17,7 +17,7 @@ const router = express.Router();
  * @swagger
  * /api/bidding/status:
  *   get:
- *     summary: Get current bid status
+ *     summary: Current month's bid status for the logged-in alumnus
  *     tags: [Bidding]
  *     security:
  *       - bearerAuth: []
@@ -26,19 +26,9 @@ const router = express.Router();
  *         description: Bid status retrieved
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 currentBid:
- *                   type: number
- *                 isWinning:
- *                   type: boolean
- *                 monthlyWins:
- *                   type: number
- *                 remainingSlots:
- *                   type: number
- *                 canBid:
- *                   type: boolean
+ *             schema: { $ref: '#/components/schemas/BidStatus' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
  */
 router.get("/status", protect, isAlumni, getBidStatus);
 
@@ -46,7 +36,7 @@ router.get("/status", protect, isAlumni, getBidStatus);
  * @swagger
  * /api/bidding/bid:
  *   post:
- *     summary: Place or update bid
+ *     summary: Place a new bid or raise the existing one (only-increase rule)
  *     tags: [Bidding]
  *     security:
  *       - bearerAuth: []
@@ -54,19 +44,21 @@ router.get("/status", protect, isAlumni, getBidStatus);
  *       required: true
  *       content:
  *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - amount
- *             properties:
- *               amount:
- *                 type: number
- *                 minimum: 0
+ *           schema: { $ref: '#/components/schemas/PlaceBidRequest' }
  *     responses:
  *       200:
- *         description: Bid placed successfully
- *       400:
- *         description: Invalid bid amount or limit reached
+ *         description: Bid placed or raised
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string }
+ *                 bid: { type: number, description: 'New bid amount' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.post(
   "/bid",
@@ -96,7 +88,7 @@ router.post("/cancel", protect, isAlumni, cancelBid);
  * @swagger
  * /api/bidding/history:
  *   get:
- *     summary: Get bidding history for current user
+ *     summary: Bidding history (all months, newest first) for the logged-in alumnus
  *     tags: [Bidding]
  *     security:
  *       - bearerAuth: []
@@ -110,6 +102,9 @@ router.post("/cancel", protect, isAlumni, cancelBid);
  *               properties:
  *                 history:
  *                   type: array
+ *                   items: { $ref: '#/components/schemas/Bid' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
  */
 router.get("/history", protect, isAlumni, getBidHistory);
 
@@ -117,31 +112,19 @@ router.get("/history", protect, isAlumni, getBidHistory);
  * @swagger
  * /api/bidding/tomorrow-slot:
  *   get:
- *     summary: Get tomorrow's featured slot
+ *     summary: Get tomorrow's featured alumnus (preview)
  *     tags: [Public API]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     responses:
  *       200:
  *         description: Tomorrow's featured slot retrieved
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 winner:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                     biography:
- *                       type: string
- *                     linkedInUrl:
- *                       type: string
- *                     profileImage:
- *                       type: string
- *       404:
- *         description: No slot selected for tomorrow yet
+ *             schema: { $ref: '#/components/schemas/WinnerSummary' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.get("/tomorrow-slot", authenticateToken, getTomorrowSlot);
 
@@ -152,40 +135,17 @@ router.get("/tomorrow-slot", authenticateToken, getTomorrowSlot);
  *     summary: Get today's featured alumnus
  *     tags: [Public API]
  *     security:
+ *       - bearerAuth: []
  *       - apiKeyAuth: []
  *     responses:
  *       200:
  *         description: Today's winner retrieved
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 winner:
- *                   type: object
- *                   properties:
- *                     name:
- *                       type: string
- *                     biography:
- *                       type: string
- *                     linkedInUrl:
- *                       type: string
- *                     profileImage:
- *                       type: string
- *                     degrees:
- *                       type: array
- *                     certifications:
- *                       type: array
- *                     licences:
- *                       type: array
- *                     courses:
- *                       type: array
- *                     employmentHistory:
- *                       type: array
- *                 bidAmount:
- *                   type: number
- *       404:
- *         description: No winner selected for today
+ *             schema: { $ref: '#/components/schemas/WinnerSummary' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 router.get("/today-winner", authenticateToken, checkPermission("read:alumni_of_day"), getTodayWinner);
 
