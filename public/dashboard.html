@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -301,7 +301,7 @@
         }
       }
     </style>
-    <link rel="stylesheet" href="/shared/sidebar.css">
+    <link rel="stylesheet" href="/shared/sidebar.css" />
   </head>
   <body>
     <div id="sidebar-container"></div>
@@ -366,7 +366,10 @@
         <div class="card">
           <div class="card-header-row">
             <h3>Certification Trends Chart</h3>
-            <button class="btn secondary" onclick="downloadCertificationsChart()">
+            <button
+              class="btn secondary"
+              onclick="downloadCertificationsChart()"
+            >
               🖼️ Download
             </button>
           </div>
@@ -401,18 +404,23 @@
     <script src="index.js"></script>
     <script>
       // Load shared sidebar
-      fetch('/shared/sidebar.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('sidebar-container').innerHTML = html;
-          window.SharedUtils?.applySidebarRoleVisibility?.(document.getElementById('sidebar-container'));
+      fetch("/shared/sidebar.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("sidebar-container").innerHTML = html;
+          window.SharedUtils?.applySidebarRoleVisibility?.(
+            document.getElementById("sidebar-container"),
+          );
           // Set up logout handler
-          const logoutBtn = document.getElementById('sidebarLogoutBtn');
+          const logoutBtn = document.getElementById("sidebarLogoutBtn");
           if (logoutBtn) {
-            logoutBtn.addEventListener('click', window.SharedUtils?.handleLogout || handleLogout);
+            logoutBtn.addEventListener(
+              "click",
+              window.SharedUtils?.handleLogout || handleLogout,
+            );
           }
         })
-        .catch(error => console.error('Failed to load sidebar:', error));
+        .catch((error) => console.error("Failed to load sidebar:", error));
     </script>
   </body>
 </html>

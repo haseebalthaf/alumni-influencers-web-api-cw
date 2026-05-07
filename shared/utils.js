@@ -1,12 +1,5 @@
-/**
- * Shared Utilities for Alumni Influencers Frontend
- * Common functions and constants used across all pages
- */
-
-// Configuration
 const API_BASE = "http://localhost:3000/api";
 
-// Token Management
 const getToken = () => localStorage.getItem("token");
 const setToken = (token) => localStorage.setItem("token", token);
 const removeToken = () => {
@@ -14,26 +7,24 @@ const removeToken = () => {
   localStorage.removeItem("userRole");
 };
 
-// Role helpers
 const getRole = () => localStorage.getItem("userRole");
 
-// Hide sidebar items whose data-role doesn't match the current user role.
-// Elements without data-role are always shown. If role is unknown, nothing is hidden.
 const applySidebarRoleVisibility = (container = document) => {
   const role = getRole();
   if (!role) return;
   container.querySelectorAll("[data-role]").forEach((el) => {
-    const allowed = el.getAttribute("data-role").split(",").map((s) => s.trim());
+    const allowed = el
+      .getAttribute("data-role")
+      .split(",")
+      .map((s) => s.trim());
     if (!allowed.includes(role)) {
       el.remove();
     }
   });
 };
 
-// Navigation
-const navigateTo = (url) => window.location.href = url;
+const navigateTo = (url) => (window.location.href = url);
 
-// Logout (calls API for proper session cleanup)
 const handleLogout = async () => {
   try {
     const token = getToken();
@@ -54,7 +45,6 @@ const handleLogout = async () => {
   navigateTo("login.html");
 };
 
-// Token Validation
 const validateToken = () => {
   const token = getToken();
   if (!token) {
@@ -63,7 +53,7 @@ const validateToken = () => {
   }
 
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(token.split(".")[1]));
     const now = Date.now() / 1000;
     if (payload.exp < now) {
       removeToken();
@@ -78,7 +68,6 @@ const validateToken = () => {
   }
 };
 
-// Error Handling
 const showError = (message) => {
   alert(`Error: ${message}`);
 };
@@ -87,7 +76,6 @@ const showSuccess = (message) => {
   alert(`Success: ${message}`);
 };
 
-// Export for use in other files
 window.SharedUtils = {
   API_BASE,
   getToken,
@@ -99,5 +87,5 @@ window.SharedUtils = {
   handleLogout,
   validateToken,
   showError,
-  showSuccess
+  showSuccess,
 };

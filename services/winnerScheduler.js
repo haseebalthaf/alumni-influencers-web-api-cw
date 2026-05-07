@@ -1,6 +1,6 @@
-const cron = require('node-cron');
+const cron = require("node-cron");
 
-const { selectWinnerForDate } = require('./winnerService');
+const { selectWinnerForDate } = require("./winnerService");
 
 let schedulerStarted = false;
 
@@ -11,24 +11,28 @@ const scheduleWinnerSelection = () => {
 
   schedulerStarted = true;
 
-  cron.schedule('0 18 * * *', async () => {
-    console.log('Running scheduled winner selection...');
+  cron.schedule(
+    "0 18 * * *",
+    async () => {
+      console.log("Running scheduled winner selection...");
 
-    try {
-      const result = await selectWinnerForDate({ strict: false });
+      try {
+        const result = await selectWinnerForDate({ strict: false });
 
-      if (!result) {
-        console.log('No winner selected during scheduled run.');
-        return;
+        if (!result) {
+          console.log("No winner selected during scheduled run.");
+          return;
+        }
+
+        console.log(`Winner selected successfully for ${result.dateLabel}.`);
+      } catch (error) {
+        console.error("Error in scheduled winner selection:", error);
       }
-
-      console.log(`Winner selected successfully for ${result.dateLabel}.`);
-    } catch (error) {
-      console.error('Error in scheduled winner selection:', error);
-    }
-  }, {
-    timezone: 'UTC',
-  });
+    },
+    {
+      timezone: "UTC",
+    },
+  );
 };
 
 module.exports = {

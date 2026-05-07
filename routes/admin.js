@@ -12,37 +12,6 @@ const { protect, isAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-/**
- * @swagger
- * /api/admin/tokens:
- *   post:
- *     summary: Create a new API token
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [name]
- *             properties:
- *               name: { type: string }
- *               permissions:
- *                 type: array
- *                 items: { $ref: '#/components/schemas/TokenPermission' }
- *                 default: ['read']
- *     responses:
- *       201:
- *         description: Token created — `token` is shown only here
- *         content:
- *           application/json:
- *             schema: { $ref: '#/components/schemas/ApiTokenCreateResponse' }
- *       400: { $ref: '#/components/responses/ValidationError' }
- *       401: { $ref: '#/components/responses/Unauthorized' }
- *       403: { $ref: '#/components/responses/Forbidden' }
- */
 router.post(
   "/tokens",
   protect,
@@ -51,25 +20,6 @@ router.post(
   createToken,
 );
 
-/**
- * @swagger
- * /api/admin/tokens:
- *   get:
- *     summary: List all API tokens (without secret values)
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Tokens
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items: { $ref: '#/components/schemas/ApiToken' }
- *       401: { $ref: '#/components/responses/Unauthorized' }
- *       403: { $ref: '#/components/responses/Forbidden' }
- */
 router.get("/tokens", protect, isAdmin, getTokens);
 
 /**

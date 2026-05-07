@@ -1,8 +1,8 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const app = require('./app');
-const connectDB = require('./config/database');
-const { scheduleWinnerSelection } = require('./services/winnerScheduler');
+const app = require("./app");
+const connectDB = require("./config/database");
+const { scheduleWinnerSelection } = require("./services/winnerScheduler");
 
 const PORT = process.env.PORT || 3000;
 

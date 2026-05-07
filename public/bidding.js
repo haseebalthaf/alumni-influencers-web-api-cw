@@ -1,6 +1,3 @@
-// Read API base + token from window.SharedUtils (shared/utils.js).
-// Avoid redeclaring `API_BASE`/`token` here — colliding top-level `const`s
-// across classic scripts cause the whole file to fail parsing.
 const apiBase = () => window.SharedUtils?.API_BASE || "http://localhost:3000/api";
 const authToken = () => window.SharedUtils?.getToken?.() || localStorage.getItem("token");
 
@@ -12,7 +9,6 @@ function redirectToLogin() {
 if (!authToken() || !window.SharedUtils?.validateToken()) {
   redirectToLogin();
 } else if (window.SharedUtils?.getRole?.() === "admin") {
-  // Bidding is alumni-only; bounce admins to the dashboard.
   window.location.href = "dashboard.html";
 } else {
   window.addEventListener("DOMContentLoaded", () => {

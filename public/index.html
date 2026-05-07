@@ -300,20 +300,22 @@
 
       <div class="footer">
         <p>
-          &copy; 2026 Alumni Influencers Platform. All rights reserved. |
-          Westminster University
+          &copy;
+          <script>
+            document.write(new Date().getFullYear());
+          </script>
+          Alumni Influencers Platform. All rights reserved. | Westminster
+          University
         </p>
       </div>
     </div>
 
     <script>
-      // Check if user is already logged in
       const token = localStorage.getItem("token");
       if (token) {
         window.location.href = "profile.html";
       }
 
-      // Add click handlers for feature cards
       document.querySelectorAll(".feature-card").forEach((card) => {
         card.addEventListener("click", () => {
           window.location.href = "register.html";

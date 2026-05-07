@@ -120,7 +120,7 @@ const profileSchema = new mongoose.Schema({
     default: 0,
   },
   lastWinMonth: {
-    type: String, // YYYY-MM
+    type: String,
     default: null,
   },
   createdAt: {

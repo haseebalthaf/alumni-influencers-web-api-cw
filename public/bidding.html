@@ -198,7 +198,7 @@
         font-size: 0.95rem;
       }
     </style>
-    <link rel="stylesheet" href="/shared/sidebar.css">
+    <link rel="stylesheet" href="/shared/sidebar.css" />
   </head>
   <body>
     <div id="sidebar-container"></div>
@@ -289,18 +289,23 @@
     <script src="bidding.js"></script>
     <script>
       // Load shared sidebar
-      fetch('/shared/sidebar.html')
-        .then(response => response.text())
-        .then(html => {
-          document.getElementById('sidebar-container').innerHTML = html;
-          window.SharedUtils?.applySidebarRoleVisibility?.(document.getElementById('sidebar-container'));
+      fetch("/shared/sidebar.html")
+        .then((response) => response.text())
+        .then((html) => {
+          document.getElementById("sidebar-container").innerHTML = html;
+          window.SharedUtils?.applySidebarRoleVisibility?.(
+            document.getElementById("sidebar-container"),
+          );
           // Set up logout handler
-          const logoutBtn = document.getElementById('sidebarLogoutBtn');
+          const logoutBtn = document.getElementById("sidebarLogoutBtn");
           if (logoutBtn) {
-            logoutBtn.addEventListener('click', window.SharedUtils?.handleLogout || handleLogout);
+            logoutBtn.addEventListener(
+              "click",
+              window.SharedUtils?.handleLogout || handleLogout,
+            );
           }
         })
-        .catch(error => console.error('Failed to load sidebar:', error));
+        .catch((error) => console.error("Failed to load sidebar:", error));
     </script>
   </body>
 </html>

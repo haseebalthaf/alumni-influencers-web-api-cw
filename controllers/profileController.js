@@ -2,7 +2,6 @@ const Profile = require("../models/Profile");
 const multer = require("multer");
 const path = require("path");
 
-// Configure multer for file upload
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, process.env.UPLOAD_PATH);
@@ -14,7 +13,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -41,13 +40,10 @@ const getProfile = async (req, res) => {
     res.json(profile);
   } catch (error) {
     console.error("Get profile error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while retrieving profile",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while retrieving profile",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -69,7 +65,6 @@ const createOrUpdateProfile = async (req, res) => {
       eventParticipationThisMonth,
     } = req.body;
 
-    // Validate required fields
     if (!personalInfo || !personalInfo.firstName || !personalInfo.lastName) {
       return res
         .status(400)
@@ -91,7 +86,6 @@ const createOrUpdateProfile = async (req, res) => {
       : undefined;
 
     if (profile) {
-      // Update existing profile
       profile.personalInfo = personalInfo;
       profile.linkedInUrl = linkedInUrl || undefined;
       profile.degrees = degrees || [];
@@ -105,7 +99,6 @@ const createOrUpdateProfile = async (req, res) => {
         profile.eventParticipationMonth = eventParticipationMonth;
       }
     } else {
-      // Create new profile
       profile = new Profile({
         user: req.user._id,
         personalInfo,
@@ -124,13 +117,10 @@ const createOrUpdateProfile = async (req, res) => {
     res.status(isNewProfile ? 201 : 200).json(profile);
   } catch (error) {
     console.error("Profile save error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while saving profile",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while saving profile",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -147,11 +137,9 @@ const uploadProfileImage = [
       const profile = await Profile.findOne({ user: req.user._id });
 
       if (!profile) {
-        return res
-          .status(404)
-          .json({
-            message: "Profile not found. Please create a profile first.",
-          });
+        return res.status(404).json({
+          message: "Profile not found. Please create a profile first.",
+        });
       }
 
       profile.profileImage = req.file.filename;
@@ -163,13 +151,11 @@ const uploadProfileImage = [
       });
     } catch (error) {
       console.error("Upload image error:", error);
-      res
-        .status(500)
-        .json({
-          message: "Server error while uploading image",
-          error:
-            process.env.NODE_ENV === "development" ? error.message : undefined,
-        });
+      res.status(500).json({
+        message: "Server error while uploading image",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
+      });
     }
   },
 ];
@@ -231,13 +217,10 @@ const getProfileById = async (req, res) => {
     res.json(profile);
   } catch (error) {
     console.error("Get profile by ID error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while retrieving profile",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while retrieving profile",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 

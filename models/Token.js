@@ -14,7 +14,14 @@ const tokenSchema = new mongoose.Schema({
   permissions: [
     {
       type: String,
-      enum: ["read", "write", "admin", "read:alumni", "read:analytics", "read:alumni_of_day"],
+      enum: [
+        "read",
+        "write",
+        "admin",
+        "read:alumni",
+        "read:analytics",
+        "read:alumni_of_day",
+      ],
       default: ["read"],
     },
   ],

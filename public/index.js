@@ -1,9 +1,3 @@
-/**
- * Dashboard Analytics - Page Initialization
- * Loaded by dashboard.html
- * Uses shared analytics-utils.js for all chart/API logic
- */
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.SharedUtils?.validateToken()) {
     return;
@@ -14,7 +8,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const industryFilterEl = document.getElementById("industryFilter");
   const degreeFilterEl = document.getElementById("degreeFilter");
 
-  sidebarLogoutBtn?.addEventListener("click", window.SharedUtils?.handleLogout || handleLogout);
+  sidebarLogoutBtn?.addEventListener(
+    "click",
+    window.SharedUtils?.handleLogout || handleLogout,
+  );
   exportSkillsBtn?.addEventListener("click", handleExportSkillsData);
   industryFilterEl?.addEventListener("change", handleFilterChange);
   degreeFilterEl?.addEventListener("change", handleFilterChange);

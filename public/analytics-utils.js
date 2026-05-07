@@ -1,12 +1,3 @@
-/**
- * Analytics Dashboard Utilities
- * Shared utilities for analytics functionality across dashboard and analytics pages
- */
-
-// Configuration / token are sourced from window.SharedUtils (shared/utils.js)
-// to avoid redeclaring the same top-level identifiers across classic scripts.
-
-// Chart configuration
 const chartIds = {
   skills: "skillsChart",
   industry: "industryChart",
@@ -16,17 +7,12 @@ const chartIds = {
   courses: "coursesChart",
 };
 
-// Global state
 const chartInstances = {};
 let skillsData = [];
 let industryData = [];
 let careerPathsData = [];
 let selectedIndustry = "";
 let selectedDegree = "";
-
-// =====================
-// Authentication
-// =====================
 
 function showTokenError(message) {
   const mainContent = document.querySelector(".main-content");
@@ -49,13 +35,10 @@ function handleTokenError() {
   window.location.href = "login.html";
 }
 
-// =====================
-// API Calls
-// =====================
-
 async function fetchAnalytics(endpoint) {
   const apiBase = window.SharedUtils?.API_BASE || "http://localhost:3000/api";
-  const token = window.SharedUtils?.getToken?.() || localStorage.getItem("token");
+  const token =
+    window.SharedUtils?.getToken?.() || localStorage.getItem("token");
 
   const headers = {};
   if (token) {
@@ -71,7 +54,7 @@ async function fetchAnalytics(endpoint) {
     if (response.status === 403) {
       throw new Error(
         errorBody?.message ||
-          "Access denied: invalid API key or insufficient permissions."
+          "Access denied: invalid API key or insufficient permissions.",
       );
     }
     throw new Error(errorBody?.message || "Failed to load analytics data");
@@ -100,10 +83,6 @@ async function fetchCertificationTrends() {
 async function fetchAlumniGrowth() {
   return fetchAnalytics("alumni-growth");
 }
-
-// =====================
-// Chart Management
-// =====================
 
 function clearChartMessage(canvasId) {
   const canvas = document.getElementById(canvasId);
@@ -151,17 +130,23 @@ function isChartDataValid(config) {
   const datasets = config?.data?.datasets;
   if (!Array.isArray(labels) || !labels.length) return false;
   if (!Array.isArray(datasets) || !datasets.length) return false;
-  return datasets.some((dataset) => Array.isArray(dataset.data) && dataset.data.length > 0);
+  return datasets.some(
+    (dataset) => Array.isArray(dataset.data) && dataset.data.length > 0,
+  );
 }
 
 function createChart(canvasId, config) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return null;
 
-  // Check if Chart.js is loaded
-  if (typeof Chart === 'undefined') {
-    console.error('Chart.js is not loaded. Please ensure Chart.js is loaded before analytics-utils.js');
-    showChartError(canvasId, "Chart library not loaded. Please refresh the page.");
+  if (typeof Chart === "undefined") {
+    console.error(
+      "Chart.js is not loaded. Please ensure Chart.js is loaded before analytics-utils.js",
+    );
+    showChartError(
+      canvasId,
+      "Chart library not loaded. Please refresh the page.",
+    );
     return null;
   }
 
@@ -178,10 +163,6 @@ function createChart(canvasId, config) {
   chartInstances[canvasId] = chart;
   return chart;
 }
-
-// =====================
-// Chart Configurations
-// =====================
 
 function buildBarConfig(labels, values, labelText) {
   return {
@@ -504,23 +485,21 @@ function renderCareerPathsChart(data) {
   return createChart(chartIds.careers, config);
 }
 
-// =====================
-// Chart Loading
-// =====================
-
 async function loadAnalytics() {
-  // Ensure Chart.js is loaded before proceeding
-  if (typeof Chart === 'undefined') {
-    console.error('Chart.js is not loaded. Waiting for Chart.js to load...');
-    // Wait for Chart.js to load (retry after a short delay)
+  if (typeof Chart === "undefined") {
+    console.error("Chart.js is not loaded. Waiting for Chart.js to load...");
     setTimeout(() => {
-      if (typeof Chart !== 'undefined') {
+      if (typeof Chart !== "undefined") {
         loadAnalytics();
       } else {
-        console.error('Chart.js failed to load. Please check your internet connection and refresh the page.');
-        // Show error on all chart canvases
-        Object.values(chartIds).forEach(canvasId => {
-          showChartError(canvasId, "Chart library failed to load. Please refresh the page.");
+        console.error(
+          "Chart.js failed to load. Please check your internet connection and refresh the page.",
+        );
+        Object.values(chartIds).forEach((canvasId) => {
+          showChartError(
+            canvasId,
+            "Chart library failed to load. Please refresh the page.",
+          );
         });
       }
     }, 1000);
@@ -534,9 +513,7 @@ async function loadAnalytics() {
     loadCertificationTrendsChart(),
     loadCareerPathsChart(),
     loadCoursesLicencesChart(),
-  ]).catch(() => {
-    // Individual chart handlers already display errors.
-  });
+  ]).catch(() => {});
 }
 
 async function loadSkillsDemandChart() {
@@ -602,16 +579,12 @@ async function loadCoursesLicencesChart() {
     const values = items.map((entry) => entry.count);
     createChart(
       chartIds.courses,
-      buildBarConfig(labels, values, "Courses / Licences")
+      buildBarConfig(labels, values, "Courses / Licences"),
     );
   } catch (error) {
     showChartError(chartIds.courses, error.message);
   }
 }
-
-// =====================
-// Export & Filtering
-// =====================
 
 function handleExportSkillsData() {
   if (!skillsData || !skillsData.length) {
@@ -638,11 +611,6 @@ function handleExportSkillsData() {
   URL.revokeObjectURL(url);
 }
 
-/**
- * Download a chart as PNG image
- * @param {string} canvasId - ID of the canvas element
- * @param {string} filename - Name of the file to download
- */
 function downloadChartAsImage(canvasId, filename = "chart.png") {
   const canvas = document.getElementById(canvasId);
   if (!canvas) {
@@ -651,61 +619,46 @@ function downloadChartAsImage(canvasId, filename = "chart.png") {
   }
 
   try {
-    // Convert canvas to blob and download
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, "image/png", 1.0);
+    canvas.toBlob(
+      (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      },
+      "image/png",
+      1.0,
+    );
   } catch (error) {
     console.error("Error downloading chart:", error);
     alert("Failed to download chart image. Please try again.");
   }
 }
 
-/**
- * Download skills chart
- */
 function downloadSkillsChart() {
   downloadChartAsImage(chartIds.skills, "skills_analytics.png");
 }
 
-/**
- * Download industry chart
- */
 function downloadIndustryChart() {
   downloadChartAsImage(chartIds.industry, "industry_distribution.png");
 }
 
-/**
- * Download growth chart
- */
 function downloadGrowthChart() {
   downloadChartAsImage(chartIds.growth, "alumni_growth.png");
 }
 
-/**
- * Download certifications chart
- */
 function downloadCertificationsChart() {
   downloadChartAsImage(chartIds.certifications, "certification_trends.png");
 }
 
-/**
- * Download career paths chart
- */
 function downloadCareerPathsChart() {
   downloadChartAsImage(chartIds.careers, "career_paths.png");
 }
 
-/**
- * Show dialog to save filter preset
- */
 function showSavePresetDialog() {
   const presetName = prompt("Enter a name for this filter preset:");
   if (presetName && presetName.trim()) {
@@ -713,16 +666,8 @@ function showSavePresetDialog() {
   }
 }
 
-// =====================
-// Filter Presets
-// =====================
-
 const PRESETS_STORAGE_KEY = "analytics_filter_presets";
 
-/**
- * Save current filters as a preset
- * @param {string} presetName - Name for the preset
- */
 function saveFilterPreset(presetName) {
   if (!presetName || presetName.trim() === "") {
     alert("Please enter a preset name");
@@ -730,10 +675,11 @@ function saveFilterPreset(presetName) {
   }
 
   const presets = getFilterPresets();
-  
-  // Check if preset already exists
-  if (presets.some(p => p.name === presetName)) {
-    const overwrite = confirm(`Preset "${presetName}" already exists. Overwrite?`);
+
+  if (presets.some((p) => p.name === presetName)) {
+    const overwrite = confirm(
+      `Preset "${presetName}" already exists. Overwrite?`,
+    );
     if (!overwrite) return;
   }
 
@@ -741,11 +687,10 @@ function saveFilterPreset(presetName) {
     name: presetName,
     industry: selectedIndustry,
     degree: selectedDegree,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
 
-  // Remove old preset with same name if exists
-  const filteredPresets = presets.filter(p => p.name !== presetName);
+  const filteredPresets = presets.filter((p) => p.name !== presetName);
   filteredPresets.push(newPreset);
 
   localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(filteredPresets));
@@ -753,22 +698,14 @@ function saveFilterPreset(presetName) {
   refreshPresetsList();
 }
 
-/**
- * Get all saved presets
- * @returns {Array} Array of saved presets
- */
 function getFilterPresets() {
   const presetsJson = localStorage.getItem(PRESETS_STORAGE_KEY);
   return presetsJson ? JSON.parse(presetsJson) : [];
 }
 
-/**
- * Load a preset
- * @param {string} presetName - Name of preset to load
- */
 function loadFilterPreset(presetName) {
   const presets = getFilterPresets();
-  const preset = presets.find(p => p.name === presetName);
+  const preset = presets.find((p) => p.name === presetName);
 
   if (!preset) {
     alert("Preset not found");
@@ -778,7 +715,6 @@ function loadFilterPreset(presetName) {
   selectedIndustry = preset.industry || "";
   selectedDegree = preset.degree || "";
 
-  // Update filter dropdowns
   const industryFilter = document.getElementById("industryFilter");
   const degreeFilter = document.getElementById("degreeFilter");
 
@@ -788,25 +724,18 @@ function loadFilterPreset(presetName) {
   applyFilters();
 }
 
-/**
- * Delete a preset
- * @param {string} presetName - Name of preset to delete
- */
 function deleteFilterPreset(presetName) {
   const confirmed = confirm(`Are you sure you want to delete "${presetName}"?`);
   if (!confirmed) return;
 
   const presets = getFilterPresets();
-  const filteredPresets = presets.filter(p => p.name !== presetName);
+  const filteredPresets = presets.filter((p) => p.name !== presetName);
 
   localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(filteredPresets));
   alert(`Preset "${presetName}" deleted successfully!`);
   refreshPresetsList();
 }
 
-/**
- * Display presets in UI
- */
 function refreshPresetsList() {
   const presetsContainer = document.getElementById("presetsContainer");
   if (!presetsContainer) return;
@@ -815,11 +744,14 @@ function refreshPresetsList() {
   presetsContainer.innerHTML = "";
 
   if (presets.length === 0) {
-    presetsContainer.innerHTML = '<p style="color: #999; font-size: 0.9rem;">No presets saved yet</p>';
+    presetsContainer.innerHTML =
+      '<p style="color: #999; font-size: 0.9rem;">No presets saved yet</p>';
     return;
   }
 
-  const presetsHtml = presets.map((preset, index) => `
+  const presetsHtml = presets
+    .map(
+      (preset, index) => `
     <div style="
       display: flex;
       gap: 8px;
@@ -864,7 +796,9 @@ function refreshPresetsList() {
         Delete
       </button>
     </div>
-  `).join("");
+  `,
+    )
+    .join("");
 
   presetsContainer.innerHTML = presetsHtml;
 }
@@ -911,7 +845,10 @@ function applyFilters() {
     if (filteredIndustry.length) {
       renderIndustryChart(filteredIndustry);
     } else {
-      showChartError(chartIds.industry, "No industry data matches this selection.");
+      showChartError(
+        chartIds.industry,
+        "No industry data matches this selection.",
+      );
     }
   }
 

@@ -1,15 +1,8 @@
-/**
- * Analytics Page - Page Initialization
- * Loaded by analytics.html
- * Uses shared analytics-utils.js for all chart/API logic
- */
-
 document.addEventListener("DOMContentLoaded", async () => {
   if (!window.SharedUtils?.validateToken()) {
     return;
   }
 
-  // Setup event listeners
   const logoutBtn = document.getElementById("sidebarLogoutBtn");
   const exportSkillsBtn = document.getElementById("exportSkillsBtn");
   const industryFilterEl = document.getElementById("industryFilter");
@@ -20,6 +13,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   industryFilterEl?.addEventListener("change", handleFilterChange);
   degreeFilterEl?.addEventListener("change", handleFilterChange);
   
-  // Load all charts
   await loadAnalytics();
 });

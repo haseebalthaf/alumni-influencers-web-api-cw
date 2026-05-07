@@ -1,12 +1,12 @@
-const Profile = require('../models/Profile');
+const Profile = require("../models/Profile");
 
 const getSkillsAnalytics = async (req, res) => {
   try {
     const skillsPipeline = [
-      { $unwind: '$certifications' },
+      { $unwind: "$certifications" },
       {
         $group: {
-          _id: '$certifications.title',
+          _id: "$certifications.title",
           count: { $sum: 1 },
         },
       },
@@ -15,7 +15,7 @@ const getSkillsAnalytics = async (req, res) => {
       {
         $project: {
           _id: 0,
-          name: '$_id',
+          name: "$_id",
           count: 1,
         },
       },
@@ -24,10 +24,10 @@ const getSkillsAnalytics = async (req, res) => {
     const data = await Profile.aggregate(skillsPipeline);
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getSkillsAnalytics error:', error);
+    console.error("Analytics getSkillsAnalytics error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving skills analytics',
+      message: "Server error while retrieving skills analytics",
     });
   }
 };
@@ -35,10 +35,10 @@ const getSkillsAnalytics = async (req, res) => {
 const getIndustryDistribution = async (req, res) => {
   try {
     const industryPipeline = [
-      { $unwind: '$employmentHistory' },
+      { $unwind: "$employmentHistory" },
       {
         $group: {
-          _id: '$employmentHistory.company',
+          _id: "$employmentHistory.company",
           count: { $sum: 1 },
         },
       },
@@ -46,7 +46,7 @@ const getIndustryDistribution = async (req, res) => {
       {
         $project: {
           _id: 0,
-          name: { $ifNull: ['$_id', 'Unknown'] },
+          name: { $ifNull: ["$_id", "Unknown"] },
           count: 1,
         },
       },
@@ -55,10 +55,10 @@ const getIndustryDistribution = async (req, res) => {
     const data = await Profile.aggregate(industryPipeline);
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getIndustryDistribution error:', error);
+    console.error("Analytics getIndustryDistribution error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving industry distribution',
+      message: "Server error while retrieving industry distribution",
     });
   }
 };
@@ -66,13 +66,13 @@ const getIndustryDistribution = async (req, res) => {
 const getCareerPaths = async (req, res) => {
   try {
     const careerPipeline = [
-      { $unwind: '$degrees' },
-      { $unwind: '$employmentHistory' },
+      { $unwind: "$degrees" },
+      { $unwind: "$employmentHistory" },
       {
         $group: {
           _id: {
-            degree: '$degrees.title',
-            role: '$employmentHistory.position',
+            degree: "$degrees.title",
+            role: "$employmentHistory.position",
           },
           count: { $sum: 1 },
         },
@@ -81,8 +81,8 @@ const getCareerPaths = async (req, res) => {
       {
         $project: {
           _id: 0,
-          degree: '$_id.degree',
-          role: '$_id.role',
+          degree: "$_id.degree",
+          role: "$_id.role",
           count: 1,
         },
       },
@@ -92,10 +92,10 @@ const getCareerPaths = async (req, res) => {
     const data = await Profile.aggregate(careerPipeline);
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getCareerPaths error:', error);
+    console.error("Analytics getCareerPaths error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving career path analytics',
+      message: "Server error while retrieving career path analytics",
     });
   }
 };
@@ -103,12 +103,12 @@ const getCareerPaths = async (req, res) => {
 const getCertificationTrends = async (req, res) => {
   try {
     const trendPipeline = [
-      { $unwind: '$certifications' },
+      { $unwind: "$certifications" },
       {
         $group: {
           _id: {
-            year: { $year: '$certifications.completionDate' },
-            month: { $month: '$certifications.completionDate' },
+            year: { $year: "$certifications.completionDate" },
+            month: { $month: "$certifications.completionDate" },
           },
           count: { $sum: 1 },
         },
@@ -118,13 +118,13 @@ const getCertificationTrends = async (req, res) => {
           _id: 0,
           month: {
             $concat: [
-              { $toString: '$_id.year' },
-              '-',
+              { $toString: "$_id.year" },
+              "-",
               {
                 $cond: {
-                  if: { $lt: ['$_id.month', 10] },
-                  then: { $concat: ['0', { $toString: '$_id.month' }] },
-                  else: { $toString: '$_id.month' },
+                  if: { $lt: ["$_id.month", 10] },
+                  then: { $concat: ["0", { $toString: "$_id.month" }] },
+                  else: { $toString: "$_id.month" },
                 },
               },
             ],
@@ -138,10 +138,10 @@ const getCertificationTrends = async (req, res) => {
     const data = await Profile.aggregate(trendPipeline);
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getCertificationTrends error:', error);
+    console.error("Analytics getCertificationTrends error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving certification trends',
+      message: "Server error while retrieving certification trends",
     });
   }
 };
@@ -152,8 +152,8 @@ const getAlumniGrowth = async (req, res) => {
       {
         $group: {
           _id: {
-            year: { $year: '$createdAt' },
-            month: { $month: '$createdAt' },
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
           },
           count: { $sum: 1 },
         },
@@ -163,13 +163,13 @@ const getAlumniGrowth = async (req, res) => {
           _id: 0,
           month: {
             $concat: [
-              { $toString: '$_id.year' },
-              '-',
+              { $toString: "$_id.year" },
+              "-",
               {
                 $cond: {
-                  if: { $lt: ['$_id.month', 10] },
-                  then: { $concat: ['0', { $toString: '$_id.month' }] },
-                  else: { $toString: '$_id.month' },
+                  if: { $lt: ["$_id.month", 10] },
+                  then: { $concat: ["0", { $toString: "$_id.month" }] },
+                  else: { $toString: "$_id.month" },
                 },
               },
             ],
@@ -183,10 +183,10 @@ const getAlumniGrowth = async (req, res) => {
     const data = await Profile.aggregate(growthPipeline);
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getAlumniGrowth error:', error);
+    console.error("Analytics getAlumniGrowth error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving alumni growth analytics',
+      message: "Server error while retrieving alumni growth analytics",
     });
   }
 };
@@ -194,17 +194,17 @@ const getAlumniGrowth = async (req, res) => {
 const getCoursesLicences = async (req, res) => {
   try {
     const coursesPipeline = [
-      { $unwind: '$courses' },
+      { $unwind: "$courses" },
       {
         $group: {
-          _id: '$courses.title',
+          _id: "$courses.title",
           count: { $sum: 1 },
         },
       },
       {
         $project: {
           _id: 0,
-          name: { $ifNull: ['$_id', 'Unknown'] },
+          name: { $ifNull: ["$_id", "Unknown"] },
           count: 1,
         },
       },
@@ -212,17 +212,17 @@ const getCoursesLicences = async (req, res) => {
     ];
 
     const licencesPipeline = [
-      { $unwind: '$licences' },
+      { $unwind: "$licences" },
       {
         $group: {
-          _id: '$licences.title',
+          _id: "$licences.title",
           count: { $sum: 1 },
         },
       },
       {
         $project: {
           _id: 0,
-          name: { $ifNull: ['$_id', 'Unknown'] },
+          name: { $ifNull: ["$_id", "Unknown"] },
           count: 1,
         },
       },
@@ -248,10 +248,10 @@ const getCoursesLicences = async (req, res) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    console.error('Analytics getCoursesLicences error:', error);
+    console.error("Analytics getCoursesLicences error:", error);
     res.status(500).json({
       success: false,
-      message: 'Server error while retrieving courses and licences analytics',
+      message: "Server error while retrieving courses and licences analytics",
     });
   }
 };

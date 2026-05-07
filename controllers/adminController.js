@@ -25,13 +25,10 @@ const createToken = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating token:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while creating token",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while creating token",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -43,13 +40,10 @@ const getTokens = async (req, res) => {
     res.json(tokens);
   } catch (error) {
     console.error("Error fetching tokens:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while retrieving tokens",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while retrieving tokens",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -67,13 +61,10 @@ const revokeToken = async (req, res) => {
     res.json({ message: "Token revoked successfully" });
   } catch (error) {
     console.error("Revoke token error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while revoking token",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while revoking token",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -99,13 +90,10 @@ const updateToken = async (req, res) => {
     });
   } catch (error) {
     console.error("Update token error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while updating token",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while updating token",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -142,13 +130,10 @@ const getUsageStats = async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error("Get usage stats error:", error);
-    res
-      .status(500)
-      .json({
-        message: "Server error while retrieving usage statistics",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while retrieving usage statistics",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 
@@ -172,19 +157,22 @@ const selectWinner = async (req, res) => {
     if (error.status) {
       return res.status(error.status).json({
         message: error.message,
-        ...(typeof error.monthlyWins !== "undefined" && { monthlyWins: error.monthlyWins }),
-        ...(typeof error.lastWinMonth !== "undefined" && { lastWinMonth: error.lastWinMonth }),
-        ...(typeof error.allowedWins !== "undefined" && { allowedWins: error.allowedWins }),
+        ...(typeof error.monthlyWins !== "undefined" && {
+          monthlyWins: error.monthlyWins,
+        }),
+        ...(typeof error.lastWinMonth !== "undefined" && {
+          lastWinMonth: error.lastWinMonth,
+        }),
+        ...(typeof error.allowedWins !== "undefined" && {
+          allowedWins: error.allowedWins,
+        }),
       });
     }
 
-    res
-      .status(500)
-      .json({
-        message: "Server error while selecting winner",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
-      });
+    res.status(500).json({
+      message: "Server error while selecting winner",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };
 

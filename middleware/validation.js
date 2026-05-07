@@ -1,205 +1,192 @@
-const { body, param, query, validationResult } = require('express-validator');
+const { body, param, query, validationResult } = require("express-validator");
 
-/**
- * Validation middleware using express-validator
- * Provides comprehensive input sanitization and validation
- */
-
-// Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      message: 'Validation error',
-      errors: errors.array().map(err => ({
+    return res.status(400).json({
+      message: "Validation error",
+      errors: errors.array().map((err) => ({
         field: err.param,
         message: err.msg,
-        value: err.value
-      }))
+        value: err.value,
+      })),
     });
   }
   next();
 };
 
-// Auth validation rules
 const validateRegister = [
-  body('email')
+  body("email")
     .trim()
     .toLowerCase()
     .isEmail()
-    .withMessage('Invalid email format')
+    .withMessage("Invalid email format")
     .matches(/@my\.westminster\.ac\.uk$/)
-    .withMessage('Email must be from @my.westminster.ac.uk domain'),
-  body('password')
+    .withMessage("Email must be from @my.westminster.ac.uk domain"),
+  body("password")
     .trim()
     .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters'),
-  body('firstName')
+    .withMessage("Password must be at least 8 characters"),
+  body("firstName")
     .trim()
     .notEmpty()
-    .withMessage('First name is required')
+    .withMessage("First name is required")
     .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters')
+    .withMessage("First name must be between 2 and 50 characters")
     .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage('First name can only contain letters, spaces, hyphens, and apostrophes'),
-  body('lastName')
+    .withMessage(
+      "First name can only contain letters, spaces, hyphens, and apostrophes",
+    ),
+  body("lastName")
     .trim()
     .notEmpty()
-    .withMessage('Last name is required')
+    .withMessage("Last name is required")
     .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters')
+    .withMessage("Last name must be between 2 and 50 characters")
     .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage('Last name can only contain letters, spaces, hyphens, and apostrophes'),
-  handleValidationErrors
+    .withMessage(
+      "Last name can only contain letters, spaces, hyphens, and apostrophes",
+    ),
+  handleValidationErrors,
 ];
 
 const validateLogin = [
-  body('email')
+  body("email")
     .trim()
     .toLowerCase()
     .isEmail()
-    .withMessage('Invalid email format'),
-  body('password')
-    .trim()
-    .notEmpty()
-    .withMessage('Password is required'),
-  handleValidationErrors
+    .withMessage("Invalid email format"),
+  body("password").trim().notEmpty().withMessage("Password is required"),
+  handleValidationErrors,
 ];
 
 const validatePasswordReset = [
-  body('email')
+  body("email")
     .trim()
     .toLowerCase()
     .isEmail()
-    .withMessage('Invalid email format'),
-  handleValidationErrors
+    .withMessage("Invalid email format"),
+  handleValidationErrors,
 ];
 
 const validateResetPasswordToken = [
-  body('newPassword')
+  body("newPassword")
     .trim()
     .isLength({ min: 8 })
-    .withMessage('Password must be at least 8 characters'),
-  body('token')
-    .trim()
-    .notEmpty()
-    .withMessage('Reset token is required'),
-  handleValidationErrors
+    .withMessage("Password must be at least 8 characters"),
+  body("token").trim().notEmpty().withMessage("Reset token is required"),
+  handleValidationErrors,
 ];
 
-// Profile validation rules
 const validateProfileUpdate = [
-  body('personalInfo.firstName')
+  body("personalInfo.firstName")
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage('First name must be between 2 and 50 characters')
+    .withMessage("First name must be between 2 and 50 characters")
     .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage('First name contains invalid characters'),
-  body('personalInfo.lastName')
+    .withMessage("First name contains invalid characters"),
+  body("personalInfo.lastName")
     .optional()
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage('Last name must be between 2 and 50 characters')
+    .withMessage("Last name must be between 2 and 50 characters")
     .matches(/^[a-zA-Z\s'-]+$/)
-    .withMessage('Last name contains invalid characters'),
-  body('personalInfo.biography')
+    .withMessage("Last name contains invalid characters"),
+  body("personalInfo.biography")
     .optional()
     .trim()
     .isLength({ max: 500 })
-    .withMessage('Biography must not exceed 500 characters'),
-  body('linkedInUrl')
+    .withMessage("Biography must not exceed 500 characters"),
+  body("linkedInUrl")
     .optional()
     .trim()
-    .if(value => value !== '')
-    .isURL({ require_protocol: true, protocols: ['http', 'https'] })
-    .withMessage('Invalid LinkedIn URL'),
-  body('degrees.*.title')
-    .optional()
-    .trim()
-    .isLength({ min: 1, max: 100 })
-    .withMessage('Degree title must be between 1 and 100 characters'),
-  body('degrees.*.university')
+    .if((value) => value !== "")
+    .isURL({ require_protocol: true, protocols: ["http", "https"] })
+    .withMessage("Invalid LinkedIn URL"),
+  body("degrees.*.title")
     .optional()
     .trim()
     .isLength({ min: 1, max: 100 })
-    .withMessage('University name must be between 1 and 100 characters'),
-  body('certifications.*.title')
+    .withMessage("Degree title must be between 1 and 100 characters"),
+  body("degrees.*.university")
     .optional()
     .trim()
     .isLength({ min: 1, max: 100 })
-    .withMessage('Certification title must be between 1 and 100 characters'),
-  body('certifications.*.issuingBody')
+    .withMessage("University name must be between 1 and 100 characters"),
+  body("certifications.*.title")
     .optional()
     .trim()
     .isLength({ min: 1, max: 100 })
-    .withMessage('Issuing body must be between 1 and 100 characters'),
-  handleValidationErrors
+    .withMessage("Certification title must be between 1 and 100 characters"),
+  body("certifications.*.issuingBody")
+    .optional()
+    .trim()
+    .isLength({ min: 1, max: 100 })
+    .withMessage("Issuing body must be between 1 and 100 characters"),
+  handleValidationErrors,
 ];
 
-// Bidding validation rules
 const validatePlaceBid = [
-  body('amount')
+  body("amount")
     .notEmpty()
-    .withMessage('Bid amount is required')
+    .withMessage("Bid amount is required")
     .isFloat({ min: 0.01 })
-    .withMessage('Bid amount must be a positive number'),
-  handleValidationErrors
+    .withMessage("Bid amount must be a positive number"),
+  handleValidationErrors,
 ];
 
-// Search validation rules
 const validateSearch = [
-  query('q')
+  query("q")
     .optional()
     .trim()
     .isLength({ max: 100 })
-    .withMessage('Search query must not exceed 100 characters')
+    .withMessage("Search query must not exceed 100 characters")
     .escape()
-    .withMessage('Search query contains invalid characters'),
-  query('industry')
-    .optional()
-    .trim()
-    .escape(),
-  query('degree')
-    .optional()
-    .trim()
-    .escape(),
-  query('year')
-    .optional()
-    .isInt()
-    .withMessage('Year must be a valid number'),
-  handleValidationErrors
+    .withMessage("Search query contains invalid characters"),
+  query("industry").optional().trim().escape(),
+  query("degree").optional().trim().escape(),
+  query("year").optional().isInt().withMessage("Year must be a valid number"),
+  handleValidationErrors,
 ];
 
-// Profile ID validation
 const validateProfileId = [
-  param('id')
-    .isMongoId()
-    .withMessage('Invalid profile ID format'),
-  handleValidationErrors
+  param("id").isMongoId().withMessage("Invalid profile ID format"),
+  handleValidationErrors,
 ];
 
-// Admin validation rules
 const validateCreateApiKey = [
-  body('name')
+  body("name")
     .trim()
     .notEmpty()
-    .withMessage('API key name is required')
+    .withMessage("API key name is required")
     .isLength({ min: 1, max: 100 })
-    .withMessage('API key name must be between 1 and 100 characters'),
-  body('permissions')
+    .withMessage("API key name must be between 1 and 100 characters"),
+  body("permissions")
     .optional()
     .isArray()
-    .withMessage('Permissions must be an array')
-    .custom(value => {
-      const allowedPermissions = ['read', 'write', 'admin', 'read:alumni', 'read:analytics', 'read:alumni_of_day'];
-      const isValid = Array.isArray(value) && value.every(p => allowedPermissions.includes(p));
+    .withMessage("Permissions must be an array")
+    .custom((value) => {
+      const allowedPermissions = [
+        "read",
+        "write",
+        "admin",
+        "read:alumni",
+        "read:analytics",
+        "read:alumni_of_day",
+      ];
+      const isValid =
+        Array.isArray(value) &&
+        value.every((p) => allowedPermissions.includes(p));
       if (!isValid) {
-        throw new Error('Invalid permission. Must be one of: ' + allowedPermissions.join(', '));
+        throw new Error(
+          "Invalid permission. Must be one of: " +
+            allowedPermissions.join(", "),
+        );
       }
       return true;
     }),
-  handleValidationErrors
+  handleValidationErrors,
 ];
 
 module.exports = {

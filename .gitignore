@@ -39,3 +39,6 @@ build/
 
 # OS files
 Thumbs.db
+
+# Docs
+docs/

@@ -6,7 +6,7 @@ const Blacklist = require("../models/Blacklist");
 
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({ message: "Access token required" });
@@ -16,7 +16,6 @@ const authenticateToken = async (req, res, next) => {
     const apiToken = await Token.findOne({ token, isActive: true });
 
     if (apiToken) {
-      // Log usage only for API tokens
       await Usage.create({
         token: apiToken._id,
         endpoint: req.originalUrl,
@@ -33,7 +32,6 @@ const authenticateToken = async (req, res, next) => {
       return next();
     }
 
-    // Fallback to JWT auth for frontend users
     const blacklistedToken = await Blacklist.findOne({ token });
     if (blacklistedToken) {
       return res.status(401).json({ message: "Invalid or revoked token" });

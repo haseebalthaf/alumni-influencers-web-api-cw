@@ -1,15 +1,13 @@
-// Read API base + token from window.SharedUtils (shared/utils.js).
-// Avoid redeclaring `API_BASE` here — it collides with the const in shared/utils.js
-// when both classic scripts share the global lexical scope.
-const apiBase = () => window.SharedUtils?.API_BASE || "http://localhost:3000/api";
-const authToken = () => window.SharedUtils?.getToken?.() || localStorage.getItem("token");
+const apiBase = () =>
+  window.SharedUtils?.API_BASE || "http://localhost:3000/api";
+const authToken = () =>
+  window.SharedUtils?.getToken?.() || localStorage.getItem("token");
 
-// Redirect if no token
 if (!authToken()) {
-  window.SharedUtils?.navigateTo("login.html") || (window.location.href = "login.html");
+  window.SharedUtils?.navigateTo("login.html") ||
+    (window.location.href = "login.html");
 }
 
-// Load existing profile
 window.addEventListener("load", loadProfile);
 
 document.getElementById("profileForm").addEventListener("submit", async (e) => {
@@ -17,8 +15,6 @@ document.getElementById("profileForm").addEventListener("submit", async (e) => {
   await saveProfile();
 });
 
-// Logout button - will be set up by the sidebar loading script
-// Add buttons
 document.getElementById("addDegreeBtn").addEventListener("click", addDegree);
 document
   .getElementById("addCertificationBtn")
@@ -29,7 +25,6 @@ document
   .getElementById("addEmploymentBtn")
   .addEventListener("click", addEmployment);
 
-// Simple image preview
 document.getElementById("profileImage").addEventListener("change", (e) => {
   const file = e.target.files[0];
   if (file) {
@@ -142,12 +137,10 @@ async function logout() {
       },
     });
 
-    // Clear token and redirect regardless of response
     localStorage.removeItem("token");
     window.location.href = "login.html";
   } catch (error) {
     console.error("Logout error:", error);
-    // Still logout client-side even if API call fails
     localStorage.removeItem("token");
     window.location.href = "login.html";
   }
@@ -178,7 +171,6 @@ async function uploadImage(file) {
   }
 }
 
-// Helper functions for dynamic arrays
 function addDegree(data = {}) {
   const container = document.getElementById("degreesContainer");
   const div = document.createElement("div");
